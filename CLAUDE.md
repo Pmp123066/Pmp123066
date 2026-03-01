@@ -4,10 +4,11 @@ This file provides guidance for AI assistants working with this repository.
 
 ## Project Overview
 
-A unit converter available as both a **web app** and a **command-line tool**. Supports conversions for:
+A unit converter and tax calculator available as both a **web app** and a **command-line tool**. Supports conversions for:
 - **Length**: meters, kilometers, centimeters, miles, feet, inches
 - **Weight**: grams, kilograms, ounces, pounds
 - **Temperature**: Celsius, Fahrenheit, Kelvin
+- **Tax Calculator**: compute tax from a subtotal, or reverse-calculate a pre-tax price from a total (includes US state preset rates)
 
 No external dependencies required.
 
@@ -21,10 +22,12 @@ No external dependencies required.
 ├── src/
 │   ├── __init__.py
 │   ├── converter.py    # Core conversion logic (Python, convert function, unit data)
+│   ├── tax.py          # Tax calculation logic (calculate_tax, calculate_pretax, preset rates)
 │   └── main.py         # Interactive CLI entry point (Python)
 └── tests/
     ├── __init__.py
-    └── test_converter.py  # Unit tests for all conversions
+    ├── test_converter.py  # Unit tests for all conversions
+    └── test_tax.py        # Unit tests for tax calculations
 ```
 
 ## Common Commands
@@ -46,8 +49,10 @@ python -m unittest tests.test_converter.TestTemperatureConversions
 
 - `index.html` — Self-contained web app with embedded CSS and JavaScript. Mobile-friendly responsive design. Conversion logic is duplicated in JS to keep the web app dependency-free.
 - `src/converter.py` — Python conversion logic. Length and weight use multiplication factors through a base unit (meters and grams respectively). Temperature uses explicit formulas via Celsius as an intermediate.
-- `src/main.py` — Interactive CLI loop. Displays numbered menus, takes user input, calls `convert()`, and prints results.
+- `src/tax.py` — Tax calculation logic. `calculate_tax()` computes tax from a subtotal; `calculate_pretax()` reverse-calculates the pre-tax price from a total. Includes `PRESET_TAX_RATES` dict with common US state rates.
+- `src/main.py` — Interactive CLI loop. Displays numbered menus, takes user input, calls `convert()`, and prints results. Also includes a tax calculator sub-menu.
 - `tests/test_converter.py` — Tests using Python's built-in `unittest`. Covers all categories, round-trip conversions, edge cases (zero, negative temps, absolute zero).
+- `tests/test_tax.py` — Tests for tax calculations: forward/reverse calculations, rounding, edge cases, and preset rate validation.
 
 ## Development Guidelines
 

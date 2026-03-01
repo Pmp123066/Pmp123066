@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unit Converter</title>
+    <title>Unit Converter & Tax Calculator</title>
     <style>
         * {
             box-sizing: border-box;
@@ -173,6 +173,67 @@
             color: #777;
             margin-top: 4px;
         }
+
+        /* Tax calculator styles */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        .mode-toggle {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: #f0f4f8;
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 10px 8px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #777;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: #333;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        .tax-breakdown {
+            margin-top: 24px;
+            padding: 20px;
+            background: #f0f4f8;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .tax-breakdown.visible { display: block; }
+
+        .tax-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 16px;
+        }
+
+        .tax-row.total {
+            border-top: 2px solid #dde4ed;
+            margin-top: 8px;
+            padding-top: 12px;
+            font-weight: 700;
+            font-size: 20px;
+            color: #1a1a2e;
+        }
+
+        .tax-row-label { color: #777; }
+        .tax-row-value { font-weight: 600; color: #333; }
     </style>
 </head>
 <body>
@@ -183,32 +244,88 @@
             <button class="category-btn active" data-category="length">Length</button>
             <button class="category-btn" data-category="weight">Weight</button>
             <button class="category-btn" data-category="temperature">Temp</button>
+            <button class="category-btn" data-category="tax">Tax</button>
         </div>
 
-        <div class="field">
-            <label>From</label>
-            <select id="from-unit"></select>
+        <!-- Unit converter section -->
+        <div class="section active" id="converter-section">
+            <div class="field">
+                <label>From</label>
+                <select id="from-unit"></select>
+            </div>
+
+            <div class="swap-row">
+                <button class="swap-btn" id="swap-btn" title="Swap units">&#8645;</button>
+            </div>
+
+            <div class="field">
+                <label>To</label>
+                <select id="to-unit"></select>
+            </div>
+
+            <div class="field">
+                <label>Value</label>
+                <input type="number" id="value-input" placeholder="Enter a number" inputmode="decimal">
+            </div>
+
+            <button class="convert-btn" id="convert-btn">Convert</button>
+
+            <div class="result" id="result">
+                <div class="result-value" id="result-value"></div>
+                <div class="result-label" id="result-label"></div>
+            </div>
         </div>
 
-        <div class="swap-row">
-            <button class="swap-btn" id="swap-btn" title="Swap units">&#8645;</button>
-        </div>
+        <!-- Tax calculator section -->
+        <div class="section" id="tax-section">
+            <div class="mode-toggle">
+                <button class="mode-btn active" data-mode="add">Add Tax</button>
+                <button class="mode-btn" data-mode="reverse">Find Pre-Tax</button>
+            </div>
 
-        <div class="field">
-            <label>To</label>
-            <select id="to-unit"></select>
-        </div>
+            <div class="field">
+                <label id="tax-amount-label">Pre-tax amount</label>
+                <input type="number" id="tax-amount-input" placeholder="Enter amount" inputmode="decimal" min="0" step="0.01">
+            </div>
 
-        <div class="field">
-            <label>Value</label>
-            <input type="number" id="value-input" placeholder="Enter a number" inputmode="decimal">
-        </div>
+            <div class="field">
+                <label>Tax rate</label>
+                <select id="tax-rate-select">
+                    <option value="custom">Custom rate</option>
+                    <option value="7.25">California (7.25%)</option>
+                    <option value="6.25">Texas (6.25%)</option>
+                    <option value="4">New York (4%)</option>
+                    <option value="6">Florida (6%)</option>
+                    <option value="6.25">Illinois (6.25%)</option>
+                    <option value="6">Pennsylvania (6%)</option>
+                    <option value="5.75">Ohio (5.75%)</option>
+                    <option value="4">Georgia (4%)</option>
+                    <option value="6.5">Washington (6.5%)</option>
+                    <option value="0">No tax - OR, MT, NH, DE (0%)</option>
+                </select>
+            </div>
 
-        <button class="convert-btn" id="convert-btn">Convert</button>
+            <div class="field" id="custom-rate-field">
+                <label>Custom rate (%)</label>
+                <input type="number" id="tax-rate-input" placeholder="e.g. 8.5" inputmode="decimal" min="0" step="0.01">
+            </div>
 
-        <div class="result" id="result">
-            <div class="result-value" id="result-value"></div>
-            <div class="result-label" id="result-label"></div>
+            <button class="convert-btn" id="tax-calc-btn">Calculate</button>
+
+            <div class="tax-breakdown" id="tax-breakdown">
+                <div class="tax-row">
+                    <span class="tax-row-label">Subtotal</span>
+                    <span class="tax-row-value" id="tax-subtotal"></span>
+                </div>
+                <div class="tax-row">
+                    <span class="tax-row-label" id="tax-rate-label">Tax (0%)</span>
+                    <span class="tax-row-value" id="tax-tax-amount"></span>
+                </div>
+                <div class="tax-row total">
+                    <span class="tax-row-label">Total</span>
+                    <span class="tax-row-value" id="tax-total"></span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -237,12 +354,24 @@
 
         let currentCategory = "length";
 
+        // Converter elements
         const fromSelect = document.getElementById("from-unit");
         const toSelect = document.getElementById("to-unit");
         const valueInput = document.getElementById("value-input");
         const resultDiv = document.getElementById("result");
         const resultValue = document.getElementById("result-value");
         const resultLabel = document.getElementById("result-label");
+        const converterSection = document.getElementById("converter-section");
+
+        // Tax elements
+        const taxSection = document.getElementById("tax-section");
+        const taxAmountInput = document.getElementById("tax-amount-input");
+        const taxAmountLabel = document.getElementById("tax-amount-label");
+        const taxRateSelect = document.getElementById("tax-rate-select");
+        const taxRateInput = document.getElementById("tax-rate-input");
+        const customRateField = document.getElementById("custom-rate-field");
+        const taxBreakdown = document.getElementById("tax-breakdown");
+        let taxMode = "add";
 
         function capitalize(s) {
             return s.charAt(0).toUpperCase() + s.slice(1);
@@ -287,6 +416,10 @@
             return rounded.toString();
         }
 
+        function formatMoney(n) {
+            return "$" + n.toFixed(2);
+        }
+
         function doConvert() {
             var value = parseFloat(valueInput.value);
             if (isNaN(value)) {
@@ -302,6 +435,39 @@
             resultDiv.classList.add("visible");
         }
 
+        function getTaxRate() {
+            if (taxRateSelect.value === "custom") {
+                return parseFloat(taxRateInput.value);
+            }
+            return parseFloat(taxRateSelect.value);
+        }
+
+        function doTaxCalc() {
+            var amount = parseFloat(taxAmountInput.value);
+            var rate = getTaxRate();
+            if (isNaN(amount) || amount < 0 || isNaN(rate) || rate < 0) {
+                taxBreakdown.classList.remove("visible");
+                return;
+            }
+
+            var subtotal, taxAmount, total;
+            if (taxMode === "add") {
+                taxAmount = Math.round(amount * rate / 100 * 100) / 100;
+                subtotal = Math.round(amount * 100) / 100;
+                total = Math.round((subtotal + taxAmount) * 100) / 100;
+            } else {
+                total = Math.round(amount * 100) / 100;
+                subtotal = Math.round(total / (1 + rate / 100) * 100) / 100;
+                taxAmount = Math.round((total - subtotal) * 100) / 100;
+            }
+
+            document.getElementById("tax-subtotal").textContent = formatMoney(subtotal);
+            document.getElementById("tax-rate-label").textContent = "Tax (" + rate + "%)";
+            document.getElementById("tax-tax-amount").textContent = formatMoney(taxAmount);
+            document.getElementById("tax-total").textContent = formatMoney(total);
+            taxBreakdown.classList.add("visible");
+        }
+
         // Category button clicks
         document.querySelectorAll(".category-btn").forEach(function(btn) {
             btn.addEventListener("click", function() {
@@ -310,10 +476,48 @@
                 });
                 btn.classList.add("active");
                 currentCategory = btn.dataset.category;
-                populateSelects(currentCategory);
-                resultDiv.classList.remove("visible");
-                valueInput.value = "";
+
+                if (currentCategory === "tax") {
+                    converterSection.classList.remove("active");
+                    taxSection.classList.add("active");
+                } else {
+                    taxSection.classList.remove("active");
+                    converterSection.classList.add("active");
+                    populateSelects(currentCategory);
+                    resultDiv.classList.remove("visible");
+                    valueInput.value = "";
+                }
             });
+        });
+
+        // Tax mode toggle
+        document.querySelectorAll(".mode-btn").forEach(function(btn) {
+            btn.addEventListener("click", function() {
+                document.querySelectorAll(".mode-btn").forEach(function(b) {
+                    b.classList.remove("active");
+                });
+                btn.classList.add("active");
+                taxMode = btn.dataset.mode;
+                taxAmountLabel.textContent = taxMode === "add" ? "Pre-tax amount" : "Total (tax included)";
+                taxAmountInput.value = "";
+                taxBreakdown.classList.remove("visible");
+            });
+        });
+
+        // Tax rate select — show/hide custom field
+        taxRateSelect.addEventListener("change", function() {
+            customRateField.style.display = taxRateSelect.value === "custom" ? "block" : "none";
+        });
+
+        // Tax calculate button
+        document.getElementById("tax-calc-btn").addEventListener("click", doTaxCalc);
+
+        // Tax Enter key
+        taxAmountInput.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") doTaxCalc();
+        });
+        taxRateInput.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") doTaxCalc();
         });
 
         // Swap button
