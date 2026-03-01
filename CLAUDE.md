@@ -2,13 +2,50 @@
 
 This file provides guidance for AI assistants working with this repository.
 
-## Repository Status
+## Project Overview
 
-This is a newly initialized repository. No application code, build configuration, or tests exist yet.
+A command-line unit converter written in Python. Supports conversions for:
+- **Length**: meters, kilometers, centimeters, miles, feet, inches
+- **Weight**: grams, kilograms, ounces, pounds
+- **Temperature**: Celsius, Fahrenheit, Kelvin
+
+No external dependencies — uses only the Python standard library.
+
+## Project Structure
+
+```
+├── CLAUDE.md           # This file — guidance for AI assistants
+├── pyproject.toml      # Project metadata
+├── .gitignore          # Git ignore rules
+├── src/
+│   ├── __init__.py
+│   ├── converter.py    # Core conversion logic (convert function, unit data)
+│   └── main.py         # Interactive CLI entry point
+└── tests/
+    ├── __init__.py
+    └── test_converter.py  # Unit tests for all conversions
+```
+
+## Common Commands
+
+```bash
+# Run the converter interactively
+python -m src.main
+
+# Run all tests
+python -m unittest discover tests/
+
+# Run a specific test class
+python -m unittest tests.test_converter.TestTemperatureConversions
+```
+
+## Architecture
+
+- `src/converter.py` — Contains all conversion logic. Length and weight use multiplication factors through a base unit (meters and grams respectively). Temperature uses explicit formulas via Celsius as an intermediate.
+- `src/main.py` — Interactive CLI loop. Displays numbered menus, takes user input, calls `convert()`, and prints results.
+- `tests/test_converter.py` — Tests using Python's built-in `unittest`. Covers all categories, round-trip conversions, edge cases (zero, negative temps, absolute zero).
 
 ## Development Guidelines
-
-When contributing to this repository, follow these conventions:
 
 ### Git Workflow
 
@@ -21,20 +58,11 @@ When contributing to this repository, follow these conventions:
 - Prefer simple, readable code over clever abstractions
 - Add tests for new functionality
 - Do not introduce known security vulnerabilities (OWASP top 10)
+- No external dependencies unless absolutely necessary
 
-### File Organization
+### Adding New Units
 
-- Keep the project root clean; place source code in dedicated directories
-- Store configuration files at the project root
-- Place documentation in a `docs/` directory or as markdown files at the root
-
-## Getting Started
-
-This repository needs to be populated with project files. When setting up:
-
-1. Choose a language/framework and add the appropriate project manifest (e.g., `package.json`, `Cargo.toml`, `pyproject.toml`)
-2. Add a `.gitignore` appropriate for the chosen stack
-3. Set up linting and formatting tools
-4. Configure a test framework
-5. Add CI/CD workflows
-6. Update this file with project-specific details
+1. For length/weight: add the unit and its conversion factor to the appropriate dict in `src/converter.py` (`LENGTH_UNITS` or `WEIGHT_UNITS`)
+2. For temperature: add conversion formulas in `_convert_temperature()`
+3. Update the `CATEGORIES` dict if adding a new category
+4. Add corresponding tests in `tests/test_converter.py`
