@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Converter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f0f4f8;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 420px;
+            height: fit-content;
+            margin-top: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 24px;
+            color: #1a1a2e;
+        }
+
+        .category-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .category-btn {
+            flex: 1;
+            padding: 12px 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #555;
+        }
+
+        .category-btn.active {
+            border-color: #4a6cf7;
+            background: #4a6cf7;
+            color: white;
+        }
+
+        .category-btn:hover {
+            border-color: #4a6cf7;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #777;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            color: #333;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23777' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+        }
+
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #4a6cf7;
+        }
+
+        .swap-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -4px 0 12px;
+        }
+
+        .swap-btn {
+            background: #f0f4f8;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .swap-btn:hover {
+            background: #dde4ed;
+        }
+
+        .convert-btn {
+            width: 100%;
+            padding: 16px;
+            background: #4a6cf7;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+
+        .convert-btn:hover {
+            background: #3a5ce5;
+        }
+
+        .result {
+            margin-top: 24px;
+            padding: 20px;
+            background: #f0f4f8;
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+        }
+
+        .result.visible {
+            display: block;
+        }
+
+        .result-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: #777;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Unit Converter</h1>
+
+        <div class="category-buttons">
+            <button class="category-btn active" data-category="length">Length</button>
+            <button class="category-btn" data-category="weight">Weight</button>
+            <button class="category-btn" data-category="temperature">Temp</button>
+        </div>
+
+        <div class="field">
+            <label>From</label>
+            <select id="from-unit"></select>
+        </div>
+
+        <div class="swap-row">
+            <button class="swap-btn" id="swap-btn" title="Swap units">&#8645;</button>
+        </div>
+
+        <div class="field">
+            <label>To</label>
+            <select id="to-unit"></select>
+        </div>
+
+        <div class="field">
+            <label>Value</label>
+            <input type="number" id="value-input" placeholder="Enter a number" inputmode="decimal">
+        </div>
+
+        <button class="convert-btn" id="convert-btn">Convert</button>
+
+        <div class="result" id="result">
+            <div class="result-value" id="result-value"></div>
+            <div class="result-label" id="result-label"></div>
+        </div>
+    </div>
+
+    <script>
+        const units = {
+            length: {
+                meters: 1,
+                kilometers: 1000,
+                centimeters: 0.01,
+                miles: 1609.344,
+                feet: 0.3048,
+                inches: 0.0254
+            },
+            weight: {
+                grams: 1,
+                kilograms: 1000,
+                ounces: 28.3495,
+                pounds: 453.592
+            },
+            temperature: {
+                celsius: null,
+                fahrenheit: null,
+                kelvin: null
+            }
+        };
+
+        let currentCategory = "length";
+
+        const fromSelect = document.getElementById("from-unit");
+        const toSelect = document.getElementById("to-unit");
+        const valueInput = document.getElementById("value-input");
+        const resultDiv = document.getElementById("result");
+        const resultValue = document.getElementById("result-value");
+        const resultLabel = document.getElementById("result-label");
+
+        function capitalize(s) {
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+
+        function populateSelects(category) {
+            const unitNames = Object.keys(units[category]);
+            fromSelect.innerHTML = "";
+            toSelect.innerHTML = "";
+            unitNames.forEach(function(unit, i) {
+                fromSelect.add(new Option(capitalize(unit), unit));
+                toSelect.add(new Option(capitalize(unit), unit));
+            });
+            if (unitNames.length > 1) {
+                toSelect.selectedIndex = 1;
+            }
+        }
+
+        function convertTemperature(value, from, to) {
+            var celsius;
+            if (from === "celsius") celsius = value;
+            else if (from === "fahrenheit") celsius = (value - 32) * 5 / 9;
+            else celsius = value - 273.15;
+
+            if (to === "celsius") return celsius;
+            else if (to === "fahrenheit") return celsius * 9 / 5 + 32;
+            else return celsius + 273.15;
+        }
+
+        function convert(value, from, to, category) {
+            if (from === to) return value;
+            if (category === "temperature") {
+                return convertTemperature(value, from, to);
+            }
+            var factors = units[category];
+            return (value * factors[from]) / factors[to];
+        }
+
+        function formatNumber(n) {
+            if (Number.isInteger(n)) return n.toString();
+            var rounded = parseFloat(n.toPrecision(8));
+            return rounded.toString();
+        }
+
+        function doConvert() {
+            var value = parseFloat(valueInput.value);
+            if (isNaN(value)) {
+                resultDiv.classList.remove("visible");
+                return;
+            }
+            var from = fromSelect.value;
+            var to = toSelect.value;
+            var result = convert(value, from, to, currentCategory);
+
+            resultValue.textContent = formatNumber(result) + " " + capitalize(to);
+            resultLabel.textContent = formatNumber(value) + " " + capitalize(from);
+            resultDiv.classList.add("visible");
+        }
+
+        // Category button clicks
+        document.querySelectorAll(".category-btn").forEach(function(btn) {
+            btn.addEventListener("click", function() {
+                document.querySelectorAll(".category-btn").forEach(function(b) {
+                    b.classList.remove("active");
+                });
+                btn.classList.add("active");
+                currentCategory = btn.dataset.category;
+                populateSelects(currentCategory);
+                resultDiv.classList.remove("visible");
+                valueInput.value = "";
+            });
+        });
+
+        // Swap button
+        document.getElementById("swap-btn").addEventListener("click", function() {
+            var temp = fromSelect.selectedIndex;
+            fromSelect.selectedIndex = toSelect.selectedIndex;
+            toSelect.selectedIndex = temp;
+            if (valueInput.value) doConvert();
+        });
+
+        // Convert button
+        document.getElementById("convert-btn").addEventListener("click", doConvert);
+
+        // Also convert on Enter key
+        valueInput.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") doConvert();
+        });
+
+        // Initialize
+        populateSelects("length");
+    </script>
+</body>
+</html>

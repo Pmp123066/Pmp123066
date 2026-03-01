@@ -4,23 +4,24 @@ This file provides guidance for AI assistants working with this repository.
 
 ## Project Overview
 
-A command-line unit converter written in Python. Supports conversions for:
+A unit converter available as both a **web app** and a **command-line tool**. Supports conversions for:
 - **Length**: meters, kilometers, centimeters, miles, feet, inches
 - **Weight**: grams, kilograms, ounces, pounds
 - **Temperature**: Celsius, Fahrenheit, Kelvin
 
-No external dependencies — uses only the Python standard library.
+No external dependencies required.
 
 ## Project Structure
 
 ```
 ├── CLAUDE.md           # This file — guidance for AI assistants
+├── index.html          # Web app (single file, works in any browser)
 ├── pyproject.toml      # Project metadata
 ├── .gitignore          # Git ignore rules
 ├── src/
 │   ├── __init__.py
-│   ├── converter.py    # Core conversion logic (convert function, unit data)
-│   └── main.py         # Interactive CLI entry point
+│   ├── converter.py    # Core conversion logic (Python, convert function, unit data)
+│   └── main.py         # Interactive CLI entry point (Python)
 └── tests/
     ├── __init__.py
     └── test_converter.py  # Unit tests for all conversions
@@ -29,7 +30,9 @@ No external dependencies — uses only the Python standard library.
 ## Common Commands
 
 ```bash
-# Run the converter interactively
+# Open the web app — just open index.html in a browser
+
+# Run the CLI converter interactively
 python -m src.main
 
 # Run all tests
@@ -41,7 +44,8 @@ python -m unittest tests.test_converter.TestTemperatureConversions
 
 ## Architecture
 
-- `src/converter.py` — Contains all conversion logic. Length and weight use multiplication factors through a base unit (meters and grams respectively). Temperature uses explicit formulas via Celsius as an intermediate.
+- `index.html` — Self-contained web app with embedded CSS and JavaScript. Mobile-friendly responsive design. Conversion logic is duplicated in JS to keep the web app dependency-free.
+- `src/converter.py` — Python conversion logic. Length and weight use multiplication factors through a base unit (meters and grams respectively). Temperature uses explicit formulas via Celsius as an intermediate.
 - `src/main.py` — Interactive CLI loop. Displays numbered menus, takes user input, calls `convert()`, and prints results.
 - `tests/test_converter.py` — Tests using Python's built-in `unittest`. Covers all categories, round-trip conversions, edge cases (zero, negative temps, absolute zero).
 
@@ -65,4 +69,5 @@ python -m unittest tests.test_converter.TestTemperatureConversions
 1. For length/weight: add the unit and its conversion factor to the appropriate dict in `src/converter.py` (`LENGTH_UNITS` or `WEIGHT_UNITS`)
 2. For temperature: add conversion formulas in `_convert_temperature()`
 3. Update the `CATEGORIES` dict if adding a new category
-4. Add corresponding tests in `tests/test_converter.py`
+4. Mirror the changes in the `units` object and `convertTemperature()` function in `index.html`
+5. Add corresponding tests in `tests/test_converter.py`
